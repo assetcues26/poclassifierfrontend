@@ -317,7 +317,10 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="header-top">
-          <h1>{APP_TITLE}</h1>
+          <div className="header-brand">
+            <img className="header-logo" src="/assetcues-logo.png" alt="AssetCues" />
+            <h1>{APP_TITLE}</h1>
+          </div>
           <nav className="mode-switch" aria-label="App sections">
             <button
               type="button"
