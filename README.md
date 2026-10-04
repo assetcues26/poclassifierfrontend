@@ -50,9 +50,21 @@ You do not configure users in the frontend.
 ## Scripts
 
 ```powershell
-npm run dev      # local Vite server
-npm run build    # production build → dist/
-npm run preview  # preview production build
+npm run dev         # local Vite server
+npm run build       # production build → dist/
+npm run preview     # preview production build
+npm test            # run unit tests once
+npm run test:watch  # re-run tests on file changes
+```
+
+## Tests
+
+Vitest unit tests cover display helpers (`src/utils.js`) and the API client (`src/api/client.js`). `fetch` is mocked — tests do not call the backend or Azure.
+
+```powershell
+cd PO_classifcationUI\frontend
+npm install
+npm test
 ```
 
 ## Deploy (Vercel)
