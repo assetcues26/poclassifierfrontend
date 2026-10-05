@@ -87,7 +87,7 @@ function LineCard({ line, idx, inputKeys, aiKeys, azure, open, onToggle, cardId 
   );
 }
 
-export default function PoDetail({ detail, loading }) {
+export default function PoDetail({ detail, loading, hasSelection = false }) {
   const [openLines, setOpenLines] = useState(() => new Set());
 
   useEffect(() => {
@@ -107,7 +107,11 @@ export default function PoDetail({ detail, loading }) {
     return (
       <section className="panel detail-panel">
         <h2 className="panel-title">PO detail</h2>
-        <div className="detail-empty">Select a purchase order to inspect ERP fields and AI output.</div>
+        <div className="detail-empty">
+          {hasSelection
+            ? null
+            : "Select a purchase order to inspect ERP fields and AI output."}
+        </div>
       </section>
     );
   }

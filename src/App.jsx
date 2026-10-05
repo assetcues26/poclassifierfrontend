@@ -105,22 +105,30 @@ export default function App() {
   useEffect(() => {
     if (!username || !job?.job_id || selectedId == null) {
       setDetail(null);
+      setDetailLoading(false);
       return undefined;
     }
     let cancelled = false;
+    // Clear previous PO immediately; only show Loading if the fetch is slow.
+    setDetail(null);
+    setDetailLoading(false);
+    const loadingTimer = setTimeout(() => {
+      if (!cancelled) setDetailLoading(true);
+    }, 180);
     (async () => {
-      setDetailLoading(true);
       try {
         const data = await withAuth(() => getItem(job.job_id, selectedId));
         if (!cancelled) setDetail(data);
       } catch (err) {
         if (!cancelled) setError(err.message || String(err));
       } finally {
+        clearTimeout(loadingTimer);
         if (!cancelled) setDetailLoading(false);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(loadingTimer);
     };
   }, [
     username,
@@ -528,7 +536,11 @@ export default function App() {
             pageSize={PAGE_SIZE}
             onPageChange={setPage}
           />
-          <PoDetail detail={detail} loading={detailLoading} />
+          <PoDetail
+            detail={detail}
+            loading={detailLoading}
+            hasSelection={selectedId != null}
+          />
         </div>
       ) : (
         <section className="panel">
