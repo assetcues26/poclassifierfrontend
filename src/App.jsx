@@ -23,7 +23,6 @@ const POLL_MS = Number(import.meta.env.VITE_POLL_INTERVAL_MS || 2000);
 const PAGE_SIZE = Number(import.meta.env.VITE_PAGE_SIZE || 50);
 
 export default function App() {
-  const [authChecking, setAuthChecking] = useState(true);
   const [username, setUsername] = useState(null);
 
   const [tab, setTab] = useState("process");
@@ -66,6 +65,7 @@ export default function App() {
     [handleUnauthorized],
   );
 
+  // Show login immediately; restore session in the background if the cookie is still valid.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -73,9 +73,7 @@ export default function App() {
         const me = await getMe();
         if (!cancelled) setUsername(me.username);
       } catch {
-        if (!cancelled) setUsername(null);
-      } finally {
-        if (!cancelled) setAuthChecking(false);
+        // Keep current username (null, or already set by a concurrent login).
       }
     })();
     return () => {
@@ -289,16 +287,6 @@ export default function App() {
     setSearch("");
     setStatusFilter("all");
     setPage(1);
-  }
-
-  if (authChecking) {
-    return (
-      <div className="login-page">
-        <div className="login-card panel">
-          <p className="login-subtitle">Checking session…</p>
-        </div>
-      </div>
-    );
   }
 
   if (!username) {

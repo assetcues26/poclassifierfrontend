@@ -3,6 +3,8 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const DEFAULT_TIMEOUT_MS = 30000;
 const UPLOAD_TIMEOUT_MS = 120000;
 const POLL_TIMEOUT_MS = 15000;
+/** Keep session restore short so a cold backend does not block the login UI. */
+const SESSION_CHECK_TIMEOUT_MS = 4000;
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -60,7 +62,7 @@ export async function logout() {
 }
 
 export async function getMe() {
-  const res = await request("/api/me", {}, POLL_TIMEOUT_MS);
+  const res = await request("/api/me", {}, SESSION_CHECK_TIMEOUT_MS);
   return res.json();
 }
 
