@@ -24,7 +24,7 @@ Copy from `.env.example`. Never put passwords, hashes, Azure URLs, or function k
 
 | Variable | Purpose |
 |---|---|
-| `VITE_API_BASE_URL` | Backend base URL (local: `http://localhost:8000`) |
+| `VITE_API_BASE_URL` | Backend base URL (local: `http://localhost:8000`; Vercel: leave empty) |
 | `VITE_POLL_INTERVAL_MS` | Progress poll interval while a job is running |
 | `VITE_PAGE_SIZE` | PO list page size |
 | `VITE_APP_TITLE` | Header title |
@@ -69,11 +69,21 @@ npm test
 
 ## Deploy (Vercel)
 
+`vercel.json` proxies `/api/*` to the Render backend so the session cookie is
+**first-party** on the Vercel domain (required for reliable Safari / Mac login).
+
 1. Build command: `npm run build`
 2. Output: `dist`
-3. Set `VITE_API_BASE_URL` to your Render backend URL (public HTTPS)
-4. Ensure the backend `CORS_ORIGINS` includes your Vercel origin
-5. On Render, use `COOKIE_SAMESITE=none` and `COOKIE_SECURE=true` for cross-site cookies
+3. Root directory: this `frontend` folder
+4. Set `VITE_API_BASE_URL` to empty (Config type, not Secret) so the browser
+   calls same-origin `/api/...` and Vercel rewrites to Render
+5. On Render set:
+   - `CORS_ORIGINS=https://poclassifier.vercel.app` (no trailing slash)
+   - `COOKIE_SAMESITE=lax`
+   - `COOKIE_SECURE=true`
+6. Redeploy frontend after changing env or `vercel.json`
+
+If you change the Render hostname, update the `destination` in `vercel.json`.
 
 ## Security
 
