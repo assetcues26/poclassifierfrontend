@@ -32,6 +32,22 @@ describe("api client", () => {
     });
   });
 
+  it("login retries once after a timeout", async () => {
+    const abortErr = new DOMException("Aborted", "AbortError");
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(abortErr)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, username: "testuser" }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const body = await login("testuser", "testpass");
+    expect(body.username).toBe("testuser");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("raises ApiError with detail from JSON body", async () => {
     mockFetch({
       ok: false,

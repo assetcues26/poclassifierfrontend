@@ -5,6 +5,9 @@ const UPLOAD_TIMEOUT_MS = 120000;
 const POLL_TIMEOUT_MS = 15000;
 /** Keep session restore short so a cold backend does not block the login UI. */
 const SESSION_CHECK_TIMEOUT_MS = 4000;
+/** Render free-tier cold starts often need 30–60s; allow login to wait. */
+const LOGIN_TIMEOUT_MS = 60000;
+const TIMEOUT_MESSAGE = "Request timed out. Check that the backend is running.";
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -39,7 +42,7 @@ async function request(path, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
     return res;
   } catch (err) {
     if (err?.name === "AbortError") {
-      throw new Error("Request timed out. Check that the backend is running.");
+      throw new Error(TIMEOUT_MESSAGE);
     }
     throw err;
   } finally {
@@ -47,13 +50,32 @@ async function request(path, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
   }
 }
 
+/** Fire-and-forget wake-up so Render starts booting before Sign in. */
+export async function wakeBackend() {
+  try {
+    await request("/api/me", {}, LOGIN_TIMEOUT_MS);
+  } catch {
+    /* 401 / timeout expected when asleep or logged out */
+  }
+}
+
 export async function login(username, password) {
-  const res = await request("/api/login", {
+  const options = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
-  });
-  return res.json();
+  };
+  try {
+    const res = await request("/api/login", options, LOGIN_TIMEOUT_MS);
+    return res.json();
+  } catch (err) {
+    // First attempt often dies while a cold Render instance is still booting.
+    if (err?.message === TIMEOUT_MESSAGE) {
+      const res = await request("/api/login", options, LOGIN_TIMEOUT_MS);
+      return res.json();
+    }
+    throw err;
+  }
 }
 
 export async function logout() {
