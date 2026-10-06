@@ -7,7 +7,6 @@ export default function LoginForm({ onSuccess, appTitle }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
 
   useEffect(() => {
     wakeBackend();
@@ -18,7 +17,6 @@ export default function LoginForm({ onSuccess, appTitle }) {
     if (busy) return;
     setError("");
     setBusy(true);
-    setStatus("Starting server…");
     try {
       const data = await login(username.trim(), password);
       onSuccess(data.username);
@@ -26,7 +24,6 @@ export default function LoginForm({ onSuccess, appTitle }) {
       setError(err.message || "Login failed");
     } finally {
       setBusy(false);
-      setStatus("");
     }
   }
 
@@ -118,7 +115,7 @@ export default function LoginForm({ onSuccess, appTitle }) {
             </div>
           </label>
           <button type="submit" className="btn btn-primary login-submit" disabled={busy}>
-            {busy ? status || "Signing in…" : "Sign in"}
+            {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>
       </div>
